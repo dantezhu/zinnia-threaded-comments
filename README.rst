@@ -1,3 +1,5 @@
+# This a fork of [django-blog-zinnia/zinnia-threaded-comments](https://github.com/django-blog-zinnia/zinnia-threaded-comments)
+
 ========================
 Zinnia-threaded-comments
 ========================
