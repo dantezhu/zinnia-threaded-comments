@@ -3,7 +3,7 @@ from django import forms
 
 from django_comments.forms import CommentForm
 
-from zinnia_threaded_comments.models import ThreadedComment
+from .models import ThreadedComment
 
 
 class ThreadedCommentForm(CommentForm):
