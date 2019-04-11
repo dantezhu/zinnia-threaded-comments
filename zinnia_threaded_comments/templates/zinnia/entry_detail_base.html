@@ -1,4 +1,3 @@
-{# {% extends "zinnia_bootstrap4_custom:zinnia/entry_detail_base.html" %} #}
 {% extends "zinnia:zinnia/entry_detail_base.html" %}
 {% load i18n %}
 {% load static %}
@@ -7,115 +6,63 @@
 {% load zinnia %}
 
 {% block link %}
-    {{ block.super }}
-    <link rel="stylesheet" type="text/css" href="{% static "zinnia_threaded_comments/css/comment-reply.css" %}" />
+  {{ block.super }}
+  <link rel="stylesheet" type="text/css" href="{% static "zinnia_threaded_comments/css/comment-reply.css" %}" />
 {% endblock link %}
 
 {% block script %}
-    {{ block.super }}
-    {% if object.comments_are_open %}
-    <script type="text/javascript" src="{% static "zinnia_threaded_comments/js/comment-reply.js" %}"></script>
-    {% endif %}
+  {{ block.super }}
+  {% if object.comments_are_open %}<script type="text/javascript" src="{% static "zinnia_threaded_comments/js/comment-reply.js" %}"></script>{% endif %}
 {% endblock %}
 
-{% block entry-comments %}
-<div class="row">
-    <div class="comments col-md-12" id="comment-list">
-
-        <h3 class="h6">
-            {% trans "Comments" %}
-            <span class="no-of-comments">
-                ({% if object.comment_count %}{{ object.comment_count }}{% else %}0{% endif %})
-            </span>
-        </h3>
-
-        {% if object.comments_are_open %}
-            {% render_comment_form for object %}
-        {% endif %}
-
-        {% if object.comment_count %}
-            {% with comment_list=object.comments %}
-                {% block comments-loop %}
-                    {% recursetree comment_list %}
-                        {% with comment=node %}
-                        <!-- One comment tree -->
-                        <div id="comment-{{ comment.pk }}-by-{{ comment.user_name|slugify }}"
-                             class="comment mb-2 row {% if comment.user %} authenticated-comment{% if comment.user.is_staff %} staff-comment{% endif %}{% if comment.user.is_superuser %} superuser-comment{% endif %}{% endif %}">
-
-                            <!-- Comentator's avatar -->
-                            {# block comment-image #}
-                            <div class="comment-avatar col-md-1 col-sm-2 text-center pr-1">
-                                <a href="">
-                                    <img class="mx-auto rounded-circle img-fluid" alt="{{ comment.name }}"
-                                         src='{% get_gravatar comment.email 60 "G" %}'>
-                                </a>
-                            </div>
-                            {# endblock comment-image #}
-                            <!--//END Comentator's avatar -->
-
-                            <div class="comment-content col-md-11 col-sm-10">
-                                {# block comment-info #}
-                                <h6 class="small comment-meta">
-                                    <a href="{% if comment.url %}{{ comment.url }}{% else %}#{% endif %}">
-                                        {{ comment.name }}
-                                    </a>
-                                    {{ comment.submit_date|date:"SHORT_DATETIME_FORMAT" }}
-                                    <a href="#comment-{{ comment.pk }}-by-{{ comment.user_name|slugify }}"
-                                       id="c{{ comment.pk }}" class="anchor-link"
-                                       title="{% trans "Direct link to this comment" %}"> #</a>
-                                </h6>
-                                {# endblock comment-info #}
-
-                                {# block comment-content #}
-                                <div class="comment-body">
-                                    {{ comment.comment|linebreaks }}
-
-                                    {# block comment-reply-link #}
-                                        {% if object.comments_are_open %}
-                                        <p style="margin-top: -10px !important;">
-                                        <a href="#comment-form" class="text-right small"
-                                           onclick="return addComment.moveForm('comment-{{ comment.pk }}-by-{{ comment.user_name|slugify }}', '{{ comment.pk }}', 'comment-form')">
-                                            <i class="fa fa-reply" aria-hidden="true"></i> {% trans "Reply" %}
-                                        </a>
-                                        </p>
-                                        {% endif %}
-                                    {# endblock comment-reply-link #}
-                                </div>
-                                {# endblock comment-content #}
-                            </div>
-
-                            <!-- reply is indented -->
-                            <!-- Reply comments -->
-                            {% block comment-replies %}
-                                {% if not comment.is_leaf_node %}
-                                <div class="comment-reply col-md-11 offset-md-1 col-sm-10 offset-sm-2">
-                                    {{ children }}
-                                </div>
-                                {% endif %}
-                            {% endblock comment-replies %}
-                            <!--//END Reply comments -->
-                            <!-- /reply is indented -->
-                        </div>
-                        <!-- //END One comment tree  -->
-                        {% endwith %}
-                    {% endrecursetree %}
-
-                {% endblock comments-loop %}
-            {% endwith %}{# //END with comment_list=object.comments #}
-            {% if not object.comments_are_open %}
-                <strong style="color: grey;">{% trans "Comments are closed." %}</strong>
-            {% endif %}
-        {% else %}{# //ELSE if object.comment_count #}
-            {% if object.comments_are_open %}
-                <strong style="color: grey;">{% trans "No comments yet." %}</strong>
-            {% else %}
-                <strong style="color: grey;">{% trans "Comments are closed." %}</strong>
-            {% endif %}
-        {% endif %}
-    </div>
-</div>
-{% endblock entry-comments %}
-
-
-{% block entry-comments-form %}
-{% endblock entry-comments-form %}
+{% block comments-loop %}
+  <ol id="comment-list" class="comment-root">
+    {% recursetree comment_list %}
+    {% with comment=node %}
+    <li id="comment-{{ comment.pk }}-by-{{ comment.user_name|slugify }}"
+        class="comment vcard {% cycle 'box1' 'box2' %}{% if comment.user %} authenticated-comment{% if comment.user.is_staff %} staff-comment{% endif %}{% if comment.user.is_superuser %} superuser-comment{% endif %}{% endif %}">
+      {% block comment-image %}
+      <img src="{% get_gravatar comment.email 60 "G" %}"
+           class="gravatar photo" alt="{{ comment.name }}" />
+      {% endblock comment-image %}
+      {% block comment-info %}
+      <p class="comment-info">
+	{% if comment.url %}
+	<a href="{{ comment.url }}" rel="external nofollow"
+           class="fn url">{{ comment.name }}</a>
+	{% else %}
+	<span class="fn">{{ comment.name }}</span>
+	{% endif %}
+	{% trans "on" context "on date" %}
+        <time class="comment-published" datetime="{{ comment.submit_date|date:"c" }}">
+          {{ comment.submit_date|date:"SHORT_DATETIME_FORMAT" }}
+        </time>
+        <a href="#comment-{{ comment.pk }}-by-{{ comment.user_name|slugify }}"
+           id="c{{ comment.pk }}" class="anchor-link"
+           title="{% trans "Direct link to this comment" %}">#</a>
+      </p>
+      {% endblock comment-info %}
+      {% block comment-content %}
+      {{ comment.comment|linebreaks }}
+      {% endblock comment-content %}
+      {% block comment-reply-link %}
+      {% if object.comments_are_open %}
+      <p class="comment-reply">
+        <a href="#comment-form" onclick="return addComment.moveForm('comment-{{ comment.pk }}-by-{{ comment.user_name|slugify }}', '{{ comment.pk }}', 'comment-form')">{% trans "Reply" %}</a>
+      </p>
+      {% endif %}
+      {% endblock comment-reply-link %}
+    </li>
+    {% block comment-replies %}
+    {% if not comment.is_leaf_node %}
+    <li class="reply">
+      <ol class="comment-children">
+        {{ children }}
+      </ol>
+    </li>
+    {% endif %}
+    {% endblock comment-replies %}
+    {% endwith %}
+    {% endrecursetree %}
+  </ol>
+{% endblock comments-loop %}
