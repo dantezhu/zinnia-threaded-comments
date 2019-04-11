@@ -20,7 +20,7 @@ class ThreadedCommentAdmin(CommentsAdmin):
                  (_('Metadata'),
                   {'fields': ('submit_date', 'ip_address',
                               'is_public', 'is_removed')}))
-    list_display = ('name', 'content_type', 'object_pk',
+    list_display = ('name', 'content_type', 'object_pk', 'comment',
                     'parent', 'ip_address', 'submit_date',
                     'is_public', 'is_removed')
     raw_id_fields = ('user', 'parent')
